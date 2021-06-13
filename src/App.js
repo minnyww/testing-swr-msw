@@ -1,24 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+import axios from "axios";
+import { useEffect } from "react";
+import useSWR, { SWRConfig } from "swr";
+import "./App.css";
+import { fetcher } from "./fetcher";
 
+const Post = () => {
+  const { data: surveyData, error } = useSWR("/posts?userId=1&_limit=1");
+
+  if (error) return <span>Error!</span>;
+  if (!surveyData) return <span>Loading!</span>;
+
+  return <div>{surveyData[0]?.title}</div>;
+};
 function App() {
+  useEffect(() => {
+    axios.interceptors.request.use((config) => {
+      config.baseURL = `https://jsonplaceholder.typicode.com`;
+      return config;
+    });
+  }, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <SWRConfig value={{ fetcher: fetcher }}>
+      <Post />
+    </SWRConfig>
   );
 }
 
